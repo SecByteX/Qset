@@ -1,0 +1,298 @@
+#!/bin/bash
+
+#QSET Terminal Shortcut 2025
+#version :  v0.1~dev
+#author : secbytex
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "You need to run this script with sudo!"
+    exit 1
+fi
+
+#Colors
+purple='\e[35m'
+blue="\e[44m"
+reset="\e[0m"
+
+
+
+#Main Show Help
+function show_help(){
+        echo "QSet Terminal Shortcut - v0.1-dev"
+        echo ""
+        echo "Usage:"
+        echo "  qset"
+        echo "  qset [command] [parameter]"
+        echo ""
+        echo "Available Commands:"
+        echo "  dns      Change your dns server what you want"
+        echo ""
+}
+
+#DNS Parameter Help Menu
+function parameter_help(){
+        echo "QSet Terminal Shortcut - v0.1-dev"
+        echo ""
+        echo "Usage: "
+        echo "  qset dns [param]"
+        echo ""
+        echo "Available Parameters (required) : "
+        echo "  -cf      Cloudflare Free DNS Server: 1.1.1.1, 1.0.0.1"
+        echo "  -g       Google Free DNS Server: 8.8.8.8, 8.8.4.4"
+        echo "  -cd      Control D Free DNS Server: 76.76.2.0, 76.76.10.0"
+        echo "  -q9      Quad9 Free DNS Server: 9.9.9.9, 149.112.112.112"
+        echo "  -oh      OpenDNS Home: 208.67.222.222, 208.67.220.220"
+        echo "  -cb      CleanBrowsing: 185.228.168.9, 185.228.169.9"
+        echo "  -ad      AdGuard DNS: 94.140.14.14, 94.140.15.15"
+        echo "  -al      Alternate DNS: 76.76.19.19, 76.223.122.150"
+
+
+
+
+}
+
+
+
+
+#Main Menu
+function qset_main_menu(){
+        #header
+        echo ""
+        echo -e "${purple}QSET Easy Shortcut${reset}"
+        echo ""
+        echo " Select from the menu:"
+        echo ""
+        echo "  1) Change DNS "
+        echo ""
+        echo "  99) Exit"
+        echo ""
+        echo -e "${blue}qset>${reset} "
+}
+
+
+#DNS MENU
+function dns_menu(){
+        echo ""
+        echo " Select from the menu:"
+        echo ""
+        echo "  1) Cloudflare DNS 1.1.1.1,1.0.0.1"
+        echo "  2) Google DNS 8.8.8.8,8.8.4.4"
+        echo "  3) Control D"
+        echo "  4) Quad9"
+        echo "  5) OpenDNS Home"
+        echo "  6) AdGuard DNS"
+        echo "  7) CleanBrowsing"
+        echo "  8) Alternate DNS"
+        echo ""
+        echo "  98) Main Menu"
+        echo "  99) Exit"
+        echo ""
+        echo -e "${blue}qset:dns>${reset}"
+}
+
+
+#DNS Changer Function
+function spesific_dns(){
+        if [[ ! -f "dns_providers.csv" ]]; then
+            echo "Error: File : \"dns_providers.csv\" not found!"
+            echo "Check your file: ./dns_providers.csv"
+            exit 1
+        fi
+        provider=$(awk -F, -v param="$1" '$1 == param {print $1}' /usr/local/share/qset/dns_providers.csv)
+        first_ip=$(awk -F, -v param="$1" '$1 == param {print $2}' /usr/local/share/qset/dns_providers.csv)
+        second_ip=$(awk -F, -v param="$1" '$1 == param {print $3}' /usr/local/share/qset/dns_providers.csv)
+
+        echo ""
+        echo "Your DNS changed for $provider"
+        echo ""
+        echo "Your Settings Now:"
+        echo ""
+        echo "#/etc/resolv.conf" > /etc/resolv.conf
+        echo "# $provider" >> /etc/resolv.conf
+        echo "nameserver $first_ip" >> /etc/resolv.conf
+        echo "nameserver $second_ip" >> /etc/resolv.conf
+        cat /etc/resolv.conf
+
+
+}
+
+#dns changed exit?
+function dns_exit_question(){
+        echo ""
+        echo "[+] You successfully changed DNS. Exit? [Y,n]:"
+}
+function dns_exit_select(){
+        if [[ "$1" == "Y" || "$1" == "y" || "$1" == "" ]]; then
+                exit 1
+        elif [[ "$1" == "N" || "$1" == "n" ]]; then
+                main_func
+        else
+                echo "wrong decision"
+                exit 1
+        fi
+}
+function dns_exit(){
+        read -p "$(dns_exit_question)" dns_exit
+        dns_exit_select "$dns_exit"
+}
+
+
+#Main Menu Select Function
+function main_func(){
+        while true; do
+                read -p "$(qset_main_menu)" son
+                case "$son" in
+                        "1")
+                                echo ""
+                                change_dns
+                                break
+                                ;;
+                        "99")
+                                echo ""
+                                break
+                                ;;
+                        *)
+
+                                ;;
+                esac
+        done
+
+}
+
+
+
+
+
+#DNS Menu Select Function
+function change_dns(){
+        echo "Your Current DNS Settings(/etc/resolv.conf):"
+        echo ""
+        cat /etc/resolv.conf
+        echo ""
+        read -p "Are you sure change your dns settings? [Y/n]:" dns_sure
+        while true; do
+                if [[ $dns_sure == "Y"  || $dns_sure == "y" || $dns_sure == "" ]]; then
+                        read -p "$(dns_menu)" dns_select
+                        case "$dns_select" in
+                                "1")
+                                        spesific_dns "Cloudflare"
+                                        dns_exit
+                                        break
+
+                                        ;;
+                                "2")
+                                        spesific_dns "Google"
+                                        dns_exit
+                                        break
+
+                                        ;;
+                                "3")
+                                        spesific_dns "Control D"
+                                        dns_exit
+                                        break
+                                        ;;
+                                "4")
+                                        spesific_dns "Quad9"
+                                        dns_exit
+                                        break
+                                        ;;
+                                "5")
+                                        spesific_dns "OpenDNS Home"
+                                        dns_exit
+                                        break
+                                        ;;
+                                "6")
+                                        spesific_dns "AdGuard DNS"
+                                        dns_exit
+                                        break
+                                        ;;
+                                "7")
+                                        spesific_dns "CleanBrowsing"
+                                        main_func
+                                        break
+                                        ;;
+                                "8")
+                                        spesific_dns "Alternate DNS"
+                                        main_func
+                                        break
+                                        ;;
+                                "98")
+                                        main_func
+                                        break
+                                        ;;
+                                "99")
+                                        echo ""
+                                        echo "See you later :)"
+                                        echo ""
+                                        break
+                                        ;;
+                                *)
+                                        echo "Not Known"
+                                        ;;
+
+                        esac
+                elif [[ "$dns_sure" == "N" || "$dns_sure" == "n" ]]; then
+                        main_func
+                        break
+                else
+                        change_dns
+
+                fi
+
+        done
+}
+
+#QSET Professional Menu
+if [[ $# -eq "0" ]]; then
+        main_func
+fi
+
+
+#Parameter Handling
+case "$1" in
+        "")
+                ;;
+        "dns")
+                case "$2" in
+                        "-cf")
+                                spesific_dns "Cloudflare"
+                                ;;
+                        "-g")
+                                spesific_dns "Google"
+                                ;;
+                        "-cd")
+                                spesific_dns "Control D"
+                                ;;
+                        "-q9")
+                                spesific_dns "Quad9"
+                                ;;
+                        "-oh")
+                                spesific_dns "OpenDNS Home"
+                                ;;
+                        "-cb")
+                                spesific_dns "CleanBrowsing"
+                                ;;
+                        "-ad")
+                                spesific_dns "AdGuard DNS"
+                                ;;
+                        "-al")
+                                spesific_dns "Alternate DNS"
+                                ;;
+                        "--help")
+                                parameter_help
+                                ;;
+                        *)
+                                echo "Error: required flag provider not set"
+                                echo "Run 'qset $1 --help' for usage."
+                ;;esac
+                ;;
+        "vpn")
+                ;;
+        "--help")
+                show_help
+                ;;
+        *)
+                echo "Error: unknown command \"$1\" for \"qset\""
+                echo "Run 'qset --help' for usage."
+                ;;
+esac

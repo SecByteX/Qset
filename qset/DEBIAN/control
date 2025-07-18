@@ -1,0 +1,7 @@
+Package: qset
+Version: 0.1~dev
+Section: utils
+Priority: optional
+Architecture: all
+Maintainer: SecByteX
+Description: Terminal Shortcut for dns settings etc.
