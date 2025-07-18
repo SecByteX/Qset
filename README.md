@@ -1,0 +1,2 @@
+# Qset
+Qset Terminal Shortcut
