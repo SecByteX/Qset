@@ -93,9 +93,9 @@ function dns_menu(){
 
 #DNS Changer Function
 function spesific_dns(){
-        if [[ ! -f "dns_providers.csv" ]]; then
+        if [[ ! -f "/usr/local/share/qset/dns_providers.csv" ]]; then
             echo "Error: File : \"dns_providers.csv\" not found!"
-            echo "Check your file: ./dns_providers.csv"
+            echo "Check your file: /usr/local/share/qset/dns_providers.csv"
             exit 1
         fi
         provider=$(awk -F, -v param="$1" '$1 == param {print $1}' /usr/local/share/qset/dns_providers.csv)
@@ -296,3 +296,5 @@ case "$1" in
                 echo "Run 'qset --help' for usage."
                 ;;
 esac
+
+
